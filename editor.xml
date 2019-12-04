@@ -4,4 +4,7 @@
     <option name="FONT_FAMILY" value="Ayuthaya" />
     <option name="LINE_SPACING" value="1.5" />
   </component>
+  <component name="EditorSettings">
+    <option name="USE_SOFT_WRAPS" value="MAIN_EDITOR" />
+  </component>
 </application>
