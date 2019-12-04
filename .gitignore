@@ -1,4 +1,4 @@
-.xml
-_mac/
+*.xml
+.idea/
 codestyles/
-.idea
+_mac/
