@@ -8,7 +8,7 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
     f"""
     Rank all the unlabeled samples in an ascending order according to
     ..math::
-    lc_i = \max p(y_i = j| x_i; W)
+    \\displaymath lc_i = \max p(y_i = j| x_i; W)
 
     Parameters
     ----------
@@ -36,7 +36,7 @@ def margin_sampling(pred_prob: np.ndarray, k: int)->np.ndarray:
     f"""
     Rank all the unlabeled samples in an ascending order according to the
     ..math::
-    ms_i = p(y_i = j_1| x_i;W) - p(y_i = j_2|x_i;W)
+    \\displaymath ms_i = p(y_i = j_1| x_i;W) - p(y_i = j_2|x_i;W)
     Parameters
     ----------
     pred_prob : np.ndarray
