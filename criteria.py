@@ -23,7 +23,8 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
         column 3: lc
     """
     # Get max probabilities prediction and its corresponding classes
-    most_pred_prob, most_pred_class = np.max(pred_prob, axis=1), np.argmax(pred_prob, axis=1)
+    most_pred_prob, most_pred_class = np.max(pred_prob, axis=1), np.argmax(
+        pred_prob, axis=1)
     l = len(pred_prob)
     lc_i = np.column_stack((list(range(l)), most_pred_class, most_pred_prob))
     # sort lc_i in ascending order
@@ -32,7 +33,7 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
     return lc_i[:k]
 
 
-def margin_sampling(pred_prob: np.ndarray, k: int)->np.ndarray:
+def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
     f"""
     Rank all the unlabeled samples in an ascending order according to the
     ..math::
@@ -67,6 +68,7 @@ def margin_sampling(pred_prob: np.ndarray, k: int)->np.ndarray:
 def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
     f"""
     Rank all the unlabeled samples in an descending order according to their
+    
     ..math::
 
     Parameters
@@ -91,3 +93,8 @@ def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
     # Sort en_i in descending order
     en_i = en_i[(-1 * en_i[:, 2]).argsort()]
     return en_i[:k]
+
+
+
+
+
