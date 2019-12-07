@@ -92,7 +92,18 @@ class Caltech256Dataset(Dataset):
 
 
 class Normalize(object):
-    def __init__(self, mean, std):
+    """
+    Normalize the image in the sample using
+    imagenet parameters
+    Parameters
+    ----------
+    mean: np.ndarray
+        mean of imagenet training set
+    std: np.ndarray
+        std of image net training set
+    """
+
+    def __init__(self, mean: np.ndarray, std: np.ndarray):
         self.mean = mean
         self.std = std
 
