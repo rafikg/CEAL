@@ -1,58 +1,54 @@
 # Authors: rafik gouiaa <rafikgouiaaphd@gmail.com>, ...
 import torch.nn as nn
+import torch.optim as optim
+
+from torchvision.models import AlexNet, alexnet
 
 
-class AlexNet(nn.Module):
-    f"""
-    This class implement AlexNet deep learning model
+def train_alexnet_for_one_epoch(train_loader, epoch=0, n_classes=256, device='cpu'):
     """
+    Train alexnet
+    Parameters
+    ----------
+    train_loader
+    n_classes
 
-    def __init__(self):
-        super(AlexNet, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=96, kernel_size=11, stride=4)
-        self.relu = nn.ReLU(True)
-        self.max_pool = nn.MaxPool2d(3, 2)
-        self.lrn1 = nn.LocalResponseNorm(size=5, alpha=0.0001, beta=0.75, k=2)
-        self.conv2 = nn.Conv2d(96, 256, 5, padding=2)
-        self.lrn2 = nn.LocalResponseNorm(size=5, alpha=0.0001, beta=0.75, k=2)
-        self.conv3 = nn.Conv2d(256, 384, 3, padding=1)
-        self.conv4 = nn.Conv2d(384, 384, 3, padding=1)
-        self.conv5 = nn.Conv2d(384, 256, 3, padding=1)
-        self.fc6 = nn.Linear(256*6*6, 4096)
-        self.dropout = nn.Dropout(p=0.5, inplace=True)
-        self.fc7 = nn.Linear(4096, 4096)
-        self.fc8 = nn.Linear(4096, 1000)
-        self.softmax = nn.Softmax(dim=1)
+    Returns
+    -------
 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.relu(x)
-        x = self.max_pool(x)
-        x = self.lrn1(x)
+    """
+    model = alexnet(pretrained=True, progress=True)
+    print(model)
+    model.classifier[6] = nn.Linear(4096, n_classes)
 
-        x = self.conv2(x)
-        x = self.relu(x)
-        x = self.max_pool(x)
-        x = self.lrn2(x)
+    # freeze layers as mentioned in the paper
+    for param in model.parameters():
+        if param is not model.classifier[6]:
+            param.requires_grad = False
 
-        x = self.conv3(x)
-        x = self.relu(x)
+    model.to(device)
+    model.train()
+    train_loss = 0
+    optimizer = optim.SGD(model.parameters(), lr=0.1)
+    criterion = nn.CrossEntropyLoss()
 
-        x = self.conv4(x)
-        x = self.relu(x)
+    for batch_idx, sample_batched in enumerate(train_loader):
+        data, label = sample_batched['image'], sample_batched['label']
+        data.to(device)
+        label.to(device)
+        optimizer.zero_grad()
 
-        x = self.conv5(x)
-        x = self.relu(x)
-        x = self.max_pool(x)
-        x = x.view(-1, 256 * 6 * 6)
-        x = self.fc6(x)
-        x = self.relu(x)
-        x = self.dropout(x)
+        # call your model
+        pred_prob = model(data)
+        loss = criterion(pred_prob, label)
+        loss.backward()
+        train_loss += loss.item()
+        optimizer.step()
+        if batch_idx % 100 == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                       100. * batch_idx / len(train_loader), loss.item() / len(data)))
+    print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(train_loader.dataset)))
 
-        x = self.fc7(x)
-        x = self.relu(x)
-        x = self.dropout(x)
+    return model
 
-        x = self.fc8(x)
-        x = self.softmax(x)
-        return x

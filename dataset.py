@@ -45,9 +45,10 @@ class Caltech256Dataset(Dataset):
         self.transform = transform
         self.data = []
         self.labels = []
+        self._classes = 256
 
         # load data and labels
-        for cat in range(0, 256):
+        for cat in range(0, self._classes):
             cat_dir = glob.glob(
                 os.path.join(self.root_dir, '%03d*' % (cat + 1)))[0]
             for img_file in glob.glob(os.path.join(cat_dir, '*.jpg')):
@@ -68,7 +69,7 @@ class Caltech256Dataset(Dataset):
         -------
         sample: dict[str, Any]
         """
-        img, label = self.data[idx], self.labels[idx]
+        img, label = self.data[idx], self.__one_hot_encoding(self.labels[idx])
         img = cv2.imread(img)
         img = img[:, :, ::-1]
         sample = {'image': img, 'label': label}
@@ -81,6 +82,23 @@ class Caltech256Dataset(Dataset):
     def __len__(self):
 
         return len(self.data)
+
+    def __one_hot_encoding(self, label):
+        """
+        transform label to one hot encode
+        Parameters
+        ----------
+        label : int
+
+        Returns
+        -------
+        label : np.array
+            one hot encoding
+        """
+        codes = np.eye(self._classes)
+
+        label = codes[label]
+        return label
 
 
 class SquarifyImage(object):
@@ -113,37 +131,6 @@ class SquarifyImage(object):
         img = self.squarify(img)
         sample = {'image': img, 'label': label}
         return sample
-
-    def __pad_to_bounding_box(self, img: np.ndarray,
-
-                              pad_num: int = 0):
-        """
-        Put the image into the center of the box.
-        Parameters
-        ----------
-        img  : np.ndarray
-            1-channel or 3-channels image
-        pad_num : int, (default=0)
-
-        Returns
-        -------
-        img_padded : np.ndarray
-        """
-        h, w = img.shape[:2]
-
-        img_padded = np.ones((self.box_size, self.box_size, 3),
-                             dtype=np.uint8) * pad_num
-        if h > w:
-            img_padded[:,
-            self.box_size // 2 - w // 2: self.box_size // 2 + int(
-                np.floor(w / 2)),
-            :] = img
-        else:
-            img_padded[
-            self.box_size // 2 - h // 2: self.box_size // 2 + int(
-                np.ceil(h / 2)), :,
-            :] = img
-        return img_padded
 
     def squarify(self, img):
         """
@@ -237,16 +224,5 @@ class ToTensor(object):
     def __call__(self, sample):
         img, label = sample['image'], sample['label']
         img = img.transpose((2, 0, 1))
-        sample = {'image': torch.from_numpy(img), 'label': label}
+        sample = {'image': torch.from_numpy(img), 'label': torch.from_numpy(label)}
         return sample
-
-
-dataset = Caltech256Dataset("caltech256/256_ObjectCategories",
-                            transform=SquarifyImage())
-
-sample = dataset[100]
-
-import matplotlib.pyplot as plt
-print(sample['image'].shape)
-plt.imshow(sample['image'])
-plt.show()
