@@ -117,7 +117,7 @@ class AlexNet(object):
                 data, labels = sample_batched['image'], \
                                sample_batched['label']
                 outputs = self.model(data)
-                _, predicted = torch.max(nn.Softmax(dim=1)(outputs.data), 1)
+                _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
