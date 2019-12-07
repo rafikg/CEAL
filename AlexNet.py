@@ -8,30 +8,56 @@ from torch.utils.data import DataLoader
 
 
 class AlexNet(object):
+    """
+    Encapsulate the pretrained alexnet model
+    Parameters
+    ----------
+    n_classes : int, default(256)
+        the new number of classes
+    device: str 'cuda' or 'cpu', default('cuda')
+    """
     def __init__(self, n_classes: int = 256, device: int = 'cuda'):
+
         self.n_classes = n_classes
         self.model = alexnet(pretrained=True, progress=True)
 
         self.__freeze_all_layers()
         self.__change_last_layer()
-        # self.__add_softmax()
 
         self.device = device
 
-    def __freeze_all_layers(self):
+    def __freeze_all_layers(self) -> None:
+        """
+        freeze all layers in alexnet
+        Returns
+        -------
+        None
+        """
 
         for param in self.model.parameters():
             param.requires_grad = False
 
-    def __change_last_layer(self):
+    def __change_last_layer(self) -> None:
+        """
+        change last layer to accept n_classes instead of 1000 classes
+        Returns
+        -------
+        None
+        """
         self.model.classifier[6] = nn.Linear(4096, self.n_classes)
 
-    def __add_softmax(self):
+    def __add_softmax(self) -> None:
+        """
+        Add softmax layer to alexnet model
+        Returns
+        -------
+
+        """
         # add softmax layer
         self.model = nn.Sequential(self.model, nn.Softmax(dim=1))
 
     def __train_one_epoch(self, train_loader: DataLoader,
-                          epoch: int = 0, each_batch_idx: int = 100):
+                          epoch: int = 0, each_batch_idx: int = 100) -> None:
         """
         Train alexnet for one epoch
         Parameters
@@ -42,7 +68,7 @@ class AlexNet(object):
             print training stats after each_batch_idx
         Returns
         -------
-        trained alexnet model.
+        None
         """
         self.model = self.model.float()
         self.model = self.model.to(self.device)
@@ -92,7 +118,7 @@ class AlexNet(object):
                                                             train_loss / len(
                                                                 train_loader.dataset)))
 
-    def train(self, epochs: int, train_loader: DataLoader):
+    def train(self, epochs: int, train_loader: DataLoader) -> None:
         """
         Train alexnet for several epochs
         Parameters
@@ -104,12 +130,22 @@ class AlexNet(object):
 
         Returns
         -------
-        self.model : trained model
+        None
         """
         for epoch in range(epochs):
             self.__train_one_epoch(train_loader=train_loader, epoch=epoch)
 
-    def test_alexnet(self, test_loader: DataLoader):
+    def test_alexnet(self, test_loader: DataLoader) -> float:
+        """
+        Calaculate alexnet accuracy on test data
+        Parameters
+        ----------
+        test_loader: DataLoader
+
+        Returns
+        -------
+        accuracy: float
+        """
         correct = 0
         total = 0
         with torch.no_grad():
