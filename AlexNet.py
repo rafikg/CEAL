@@ -159,3 +159,7 @@ class AlexNet(object):
 
         print('Accuracy of the network on the: %d %%' % (
                 100 * correct / total))
+
+# TODO
+# Fix some bugs in the training process of AlexNet. It is too slow and
+# and the loss is not stable
