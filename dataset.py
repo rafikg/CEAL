@@ -69,9 +69,10 @@ class Caltech256Dataset(Dataset):
         -------
         sample: dict[str, Any]
         """
-        img, label = self.data[idx], self.__one_hot_encoding(self.labels[idx])
+        img, label = self.data[idx], self.labels[idx]
         img = cv2.imread(img)
         img = img[:, :, ::-1]
+        img = self.img_normalize(img)
         sample = {'image': img, 'label': label}
 
         if self.transform:
@@ -83,22 +84,24 @@ class Caltech256Dataset(Dataset):
 
         return len(self.data)
 
-    def __one_hot_encoding(self, label):
-        """
-        transform label to one hot encode
-        Parameters
-        ----------
-        label : int
+    @staticmethod
+    def img_normalize(img):
+        img = (img / 255)
 
-        Returns
-        -------
-        label : np.array
-            one hot encoding
-        """
-        codes = np.eye(self._classes)
+        return img
 
-        label = codes[label]
-        return label
+
+class Normalize(object):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, sample):
+        img, label = sample['image'], sample['label']
+        img = img - self.mean
+        img /= self.std
+        sample = {'image': img, 'label': label}
+        return sample
 
 
 class SquarifyImage(object):
@@ -120,6 +123,7 @@ class SquarifyImage(object):
     def __init__(self, box_size: int = 256, scale: tuple = (0.6, 1.2),
                  is_scale: bool = True,
                  seed: Optional[Union[Callable, int]] = None):
+        super(SquarifyImage, self).__init__()
         self.box_size = box_size
         self.min_scale_ratio = scale[0]
         self.max_scale_ratio = scale[1]
@@ -159,7 +163,9 @@ class SquarifyImage(object):
         resized_img = cv2.resize(img, (resize_h, resize_w))
 
         img_padded = cv2.copyMakeBorder(resized_img, top=t_pad, bottom=b_pad,
-                                        left=l_pad, right=r_pad, borderType=0)
+                                        left=l_pad, right=r_pad,
+                                        borderType=0,
+                                        value=128)
 
         if img_padded.shape == [self.box_size, self.box_size, 3]:
             raise ValueError(
@@ -192,14 +198,13 @@ class RandomCrop(object):
 
     """
 
-    def __int__(self, target_size: Union[tuple, int]):
+    def __init__(self, target_size: Union[tuple, int]):
 
         if isinstance(target_size, int):
             self.target_size = (target_size, target_size)
         else:
             assert len(target_size) == 2
             self.target_size = target_size
-        self.target_size = target_size
 
     def __call__(self, sample):
 
@@ -224,5 +229,6 @@ class ToTensor(object):
     def __call__(self, sample):
         img, label = sample['image'], sample['label']
         img = img.transpose((2, 0, 1))
-        sample = {'image': torch.from_numpy(img), 'label': torch.from_numpy(label)}
+        sample = {'image': torch.from_numpy(img),
+                  'label': label}
         return sample
