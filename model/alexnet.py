@@ -110,13 +110,11 @@ class AlexNet(object):
             optimizer.step()
 
             if batch_idx % each_batch_idx == 0:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, batch_idx * len(data), len(train_loader.dataset),
-                           each_batch_idx * batch_idx / len(train_loader),
-                           loss.item() / len(data)))
-                if valid_loader:
-                    acc = self.test_alexnet(test_loader=valid_loader)
-                    print('Accuracy on the valid dataset {}'.format(acc))
+                print('Train Epoch: {},  Loss: {:.6f}'.format(
+                    epoch, loss.item() / len(data)))
+        if valid_loader:
+            acc = self.test_alexnet(test_loader=valid_loader)
+            print('Accuracy on the valid dataset {}'.format(acc))
 
         print('====> Epoch: {} Average loss: {:.4f}'.
               format(epoch,

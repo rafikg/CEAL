@@ -39,7 +39,6 @@ def ceal_learning_algorithm(du: np.ndarray, dl: np.ndarray, k: int,
     pass
 
 
-
 dataset = Caltech256Dataset(root_dir="../caltech256/256_ObjectCategories",
                             transform=transforms.Compose(
                                 [SquarifyImage(),
