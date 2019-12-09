@@ -73,9 +73,12 @@ class AlexNet(object):
         Parameters
         ----------
         train_loader : DataLoader
+        criterion :  Callable
+        optimizer : Optimizer (torch.optim)
         epoch : int
         each_batch_idx : int
             print training stats after each_batch_idx
+
         Returns
         -------
         None
