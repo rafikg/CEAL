@@ -17,7 +17,8 @@ class AlexNet(object):
     ----------
     n_classes : int, default(256)
         the new number of classes
-    device: str 'cuda' or 'cpu', default('cuda')
+    device: Optional[str] 'cuda' or 'cpu', default(None)
+            if None: cuda will be used if it is available
     """
 
     def __init__(self, n_classes: int = 256, device: Optional[str] = None):
