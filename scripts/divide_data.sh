@@ -1,23 +1,20 @@
-# create a training folder
-base="training/"
-mkdir -p "$base"
+# This script is to divide the dataset into 80% 20%
 
-# loop over subfolders of datasets
+base_folder="test/"
+
+mkdir -p "$base_folder"
+
 for dir in "../caltech256/256_ObjectCategories/"*
 do
-  # get the subfolder basename
+
   subdir=$(basename "$dir")
 
-  # create a subfolder under training having the same basename
-  mkdir -p "$base$subdir"
+  mkdir -p "$base_folder$subdir"
 
-  # count the number of files in the current subfolder
   count=$(ls "$dir" | wc -l)
 
-  # calculate the pourcentage to mv
   tenpercent=$(expr $count '*' 20 '/' 100)
 
-  # move 20%
-  ls "$dir" | gshuf -n "$tenpercent" | xargs -I {} mv "$dir"/{} "$base$subdir"
+  ls "$dir" | gshuf -n "$tenpercent" | xargs -I {} mv "$dir"/{} "$base_folder$subdir"
 
 done
