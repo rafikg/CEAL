@@ -1,6 +1,6 @@
 # This script is to divide the dataset into 80% 20%
-
-base_folder="test/"
+echo "If you run this script on linux, change gshuf with shuf "
+base_folder="../caltech256/256_ObjectCategories_test/"
 
 mkdir -p "$base_folder"
 
@@ -15,6 +15,6 @@ do
 
   tenpercent=$(expr $count '*' 20 '/' 100)
 
-  ls "$dir" | gshuf -n "$tenpercent" | xargs -I {} mv "$dir"/{} "$base_folder$subdir"
+  ls "$dir" | shuf -n "$tenpercent" | xargs -I {} mv "$dir"/{} "$base_folder$subdir"
 
 done
