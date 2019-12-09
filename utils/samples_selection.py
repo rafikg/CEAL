@@ -1,4 +1,4 @@
-from criteria import least_confidence, entropy, margin_sampling
+from utils.criteria import least_confidence, entropy, margin_sampling
 import numpy as np
 
 

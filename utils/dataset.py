@@ -3,16 +3,16 @@
 # Modified from <https://pytorch.org/tutorials/beginner/
 # data_loading_tutorial.html#transforms>
 
-from typing import Optional, Callable, Tuple, Union, Any
-
-import cv2
-from torch.utils.data import Dataset, DataLoader
+from typing import Optional, Callable, Union
+from torch.utils.data import Dataset
 
 import torch
 import os
 import glob
 import numpy as np
 import warnings
+import cv2
+
 
 warnings.filterwarnings("ignore")
 
@@ -51,6 +51,7 @@ class Caltech256Dataset(Dataset):
         for cat in range(0, self._classes):
             cat_dir = glob.glob(
                 os.path.join(self.root_dir, '%03d*' % (cat + 1)))[0]
+
             for img_file in glob.glob(os.path.join(cat_dir, '*.jpg')):
                 self.data.append(img_file)
                 self.labels.append(cat)
@@ -173,14 +174,17 @@ class SquarifyImage(object):
 
         resized_img = cv2.resize(img, (resize_h, resize_w))
 
-        img_padded = cv2.copyMakeBorder(resized_img, top=t_pad, bottom=b_pad,
-                                        left=l_pad, right=r_pad,
+        img_padded = cv2.copyMakeBorder(resized_img,
+                                        top=t_pad,
+                                        bottom=b_pad,
+                                        left=l_pad,
+                                        right=r_pad,
                                         borderType=0,
-                                        value=128)
+                                        value=0)
 
         if img_padded.shape == [self.box_size, self.box_size, 3]:
             raise ValueError(
-                'Invalid squarified image {} !'.format(img_padded.shape))
+                'Invalid size for squarified image {} !'.format(img_padded.shape))
         return img_padded
 
     def img_scale(self, img):

@@ -1,4 +1,5 @@
 # Authors: rafik gouiaa <rafikgouiaaphd@gmail.com>, ...
+
 import torch.nn as nn
 import torch.optim as optim
 import torch
@@ -46,7 +47,7 @@ class AlexNet(object):
         """
         self.model.classifier[6] = nn.Linear(4096, self.n_classes)
 
-    def __add_softmax(self) -> None:
+    def __add_softmax_layer(self) -> None:
         """
         Add softmax layer to alexnet model
         Returns
