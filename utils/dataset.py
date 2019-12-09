@@ -13,7 +13,6 @@ import numpy as np
 import warnings
 import cv2
 
-
 warnings.filterwarnings("ignore")
 
 
@@ -87,7 +86,7 @@ class Caltech256Dataset(Dataset):
 
     @staticmethod
     def img_normalize(img):
-        img = (img / 255)
+        img = (img / 255.0)
 
         return img
 
@@ -104,7 +103,8 @@ class Normalize(object):
         std of image net training set
     """
 
-    def __init__(self, mean: np.ndarray, std: np.ndarray):
+    def __init__(self, mean: np.ndarray = np.array([0.485, 0.456, 0.406]),
+                 std: np.ndarray = np.array([0.229, 0.224, 0.225])):
         self.mean = mean
         self.std = std
 
@@ -184,7 +184,8 @@ class SquarifyImage(object):
 
         if img_padded.shape == [self.box_size, self.box_size, 3]:
             raise ValueError(
-                'Invalid size for squarified image {} !'.format(img_padded.shape))
+                'Invalid size for squarified image {} !'.format(
+                    img_padded.shape))
         return img_padded
 
     def img_scale(self, img):

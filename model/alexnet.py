@@ -1,8 +1,10 @@
 # Authors: rafik gouiaa <rafikgouiaaphd@gmail.com>, ...
 
+from typing import Optional, Callable
 import torch.nn as nn
 import torch.optim as optim
 import torch
+import torch.optim as Optimizer
 
 from torchvision.models import alexnet
 from torch.utils.data import DataLoader
@@ -17,15 +19,18 @@ class AlexNet(object):
         the new number of classes
     device: str 'cuda' or 'cpu', default('cuda')
     """
-    def __init__(self, n_classes: int = 256, device: int = 'cuda'):
+
+    def __init__(self, n_classes: int = 256, device: Optional[str] = None):
 
         self.n_classes = n_classes
         self.model = alexnet(pretrained=True, progress=True)
 
         self.__freeze_all_layers()
         self.__change_last_layer()
-
-        self.device = device
+        if device is None:
+            self.device = torch.device(
+                "cuda:0" if torch.cuda.is_available() else "cpu")
+        print(self.device)
 
     def __freeze_all_layers(self) -> None:
         """
@@ -58,7 +63,11 @@ class AlexNet(object):
         self.model = nn.Sequential(self.model, nn.Softmax(dim=1))
 
     def __train_one_epoch(self, train_loader: DataLoader,
-                          epoch: int = 0, each_batch_idx: int = 100) -> None:
+                          optimizer: Optimizer,
+                          criterion: Callable,
+                          valid_loader: DataLoader = None,
+                          epoch: int = 0,
+                          each_batch_idx: int = 300) -> None:
         """
         Train alexnet for one epoch
         Parameters
@@ -71,17 +80,7 @@ class AlexNet(object):
         -------
         None
         """
-        self.model = self.model.float()
-        self.model = self.model.to(self.device)
-        self.model.train()
-
         train_loss = 0
-        optimizer = optim.SGD(
-            filter(lambda p: p.requires_grad, self.model.parameters()),
-            lr=0.001,
-            momentum=0.9)
-
-        criterion = nn.CrossEntropyLoss()
 
         for batch_idx, sample_batched in enumerate(train_loader):
             # load data and label
@@ -115,11 +114,17 @@ class AlexNet(object):
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                            each_batch_idx * batch_idx / len(train_loader),
                            loss.item() / len(data)))
-        print('====> Epoch: {} Average loss: {:.4f}'.format(epoch,
-                                                            train_loss / len(
-                                                                train_loader.dataset)))
+                if valid_loader:
+                    acc = self.test_alexnet(test_loader=valid_loader)
+                    print('Accuracy on the valid dataset {}'.format(acc))
 
-    def train(self, epochs: int, train_loader: DataLoader) -> None:
+        print('====> Epoch: {} Average loss: {:.4f}'.
+              format(epoch,
+                     train_loss / len(
+                         train_loader.dataset)))
+
+    def train(self, epochs: int, train_loader: DataLoader,
+              valid_loader: DataLoader = None) -> None:
         """
         Train alexnet for several epochs
         Parameters
@@ -128,13 +133,27 @@ class AlexNet(object):
             number of epochs
         train_loader:  DataLoader
             training set
+        valid_loader : DataLoader, Optional
 
         Returns
         -------
         None
         """
+        self.model.to(self.device)
+        self.model.train()
+        optimizer = optim.SGD(
+            filter(lambda p: p.requires_grad, self.model.parameters()),
+            lr=0.001,
+            momentum=0.9)
+
+        criterion = nn.CrossEntropyLoss()
         for epoch in range(epochs):
-            self.__train_one_epoch(train_loader=train_loader, epoch=epoch)
+            self.__train_one_epoch(train_loader=train_loader,
+                                   optimizer=optimizer,
+                                   criterion=criterion,
+                                   valid_loader=valid_loader,
+                                   epoch=epoch
+                                   )
 
     def test_alexnet(self, test_loader: DataLoader) -> float:
         """
@@ -153,14 +172,11 @@ class AlexNet(object):
             for batch_idx, sample_batched in enumerate(test_loader):
                 data, labels = sample_batched['image'], \
                                sample_batched['label']
+                data = data.to(self.device)
+                data = data.float()
+                labels = labels.to(self.device)
                 outputs = self.model(data)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-
-        print('Accuracy of the network on the: %d %%' % (
-                100 * correct / total))
-
-# TODO
-# Fix some bugs in the training process of AlexNet. It is too slow and
-# and the loss is not stable
+        return 100 * correct / total
