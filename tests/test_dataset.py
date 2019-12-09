@@ -51,10 +51,3 @@ def test_data_batch():
         assert list(sample['image'].size()) == [4, 3, 224, 224]
         if batch_i == 0:
             break
-
-
-if __name__ == "__main__":
-    # test_data_squarify()
-    test_data_random_crop()
-    # test_data_to_tensor()
-    # test_data_batch()

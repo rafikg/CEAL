@@ -72,6 +72,6 @@ validation_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
 
 model = AlexNet(n_classes=256, device=None)
 
-model.train(epochs=10, train_loader=train_loader,
+model.train(epochs=50, train_loader=train_loader,
             valid_loader=validation_loader)
 
