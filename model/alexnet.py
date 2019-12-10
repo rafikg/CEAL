@@ -2,16 +2,16 @@
 
 from typing import Optional, Callable
 
+from torchvision.models import alexnet
+from torch.utils.data import DataLoader
+from torch.nn.functional import softmax
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torch
 import torch.optim as Optimizer
-
-from torchvision.models import alexnet
-from torch.utils.data import DataLoader
-
 import logging
+
 
 logging.basicConfig(format="%(levelname)s:%(name)s: %(message)s",
                     level=logging.INFO)
@@ -39,7 +39,7 @@ class AlexNet(object):
         if device is None:
             self.device = torch.device(
                 "cuda:0" if torch.cuda.is_available() else "cpu")
-        print(self.device)
+        logger.info('The code is running on {} '.format(self.device))
 
     def __freeze_all_layers(self) -> None:
         """
@@ -69,7 +69,7 @@ class AlexNet(object):
 
         """
         # add softmax layer
-        self.model = nn.Sequential(self.model, nn.Softmax(dim=1))
+        self.model = nn.Sequential(self.model, nn.LogSoftmax(dim=1))
 
     def __train_one_epoch(self, train_loader: DataLoader,
                           optimizer: Optimizer,
@@ -93,6 +93,7 @@ class AlexNet(object):
         None
         """
         train_loss = 0
+        data_size = 0
 
         for batch_idx, sample_batched in enumerate(train_loader):
             # load data and label
@@ -117,21 +118,24 @@ class AlexNet(object):
 
             # total train loss
             train_loss += loss.item()
+            data_size += label.size(0)
 
             # update weights
             optimizer.step()
 
             if batch_idx % each_batch_idx == 0:
-                logger.info('Train Epoch: {},  Loss: {:.6f}'.format(
-                    epoch, loss.item() / len(data)))
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(data),
+                    len(train_loader.sampler.indices),
+                    100. * batch_idx / len(train_loader.sampler.indices),
+                    loss.item()))
         if valid_loader:
             acc = self.evaluate(test_loader=valid_loader)
-            logger.info('Accuracy on the valid dataset {}'.format(acc))
+            print('Accuracy on the valid dataset {}'.format(acc))
 
-        logger.info('====> Epoch: {} Average loss: {:.4f}'.
-                    format(epoch,
-                           train_loss / len(
-                               train_loader.dataset)))
+        print('====> Epoch: {} Average loss: {:.4f}'.
+              format(epoch,
+                     train_loss / data_size))
 
     def train(self, epochs: int, train_loader: DataLoader,
               valid_loader: DataLoader = None) -> None:
@@ -153,8 +157,7 @@ class AlexNet(object):
         self.model.train()
         optimizer = optim.SGD(
             filter(lambda p: p.requires_grad, self.model.parameters()),
-            lr=0.001,
-            momentum=0.9)
+            lr=0.001, momentum=0.9)
 
         criterion = nn.CrossEntropyLoss()
         for epoch in range(epochs):
@@ -213,6 +216,7 @@ class AlexNet(object):
                 data = data.to(self.device)
                 data = data.float()
                 outputs = self.model(data)
+                outputs = softmax(outputs)
                 predict_results = np.concatenate(
                     (predict_results, outputs.cpu().numpy()))
         return predict_results

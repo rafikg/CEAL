@@ -54,35 +54,55 @@ def ceal_learning_algorithm(du: DataLoader,
     -------
 
     """
+    logger.info('Initial configuration: len(du): {}, len(dl): {} '.format(
+        len(du.sampler.indices),
+        len(dl.sampler.indices)))
     # Create the model
     model = AlexNet(n_classes=256, device=None)
 
     # Initialize the model
-    logger.info('Intialize the model on dl and test on dtest')
-    model.train(epochs=epochs, train_loader=dl, valid_loader=dtest)
+    logger.info('Intialize training the model on dl and test on dtest')
+    model.train(epochs=epochs, train_loader=dl, valid_loader=None)
+
+    # Evaluate model on dtest
+    acc = model.evaluate(test_loader=dtest)
+    logger.info('Intial accuracy: {} '.format(acc))
 
     # High confidence samples
     for iteration in range(max_iter):
+        logger.info('Calculate prediction on the unlabeled dataset `du`')
         pred_prob = model.predict(test_loader=du)
 
         # get k uncertain samples
         uncert_samp_idx = get_uncertain_samples(pred_prob=pred_prob, k=k,
                                                 criteria=criteria)[:, 0]
 
+        uncert_samp_idx = uncert_samp_idx.astype(int)
+
+        uncert_samp_idx = [du.sampler.indices[idx] for idx in uncert_samp_idx]
+
         # add the uncertain samples selected from `du` to the labeled samples
         #  set `dl`
-        # these samples are deleted from the original du
-        dl.sampler.indices.extend(uncert_samp_idx.astype(int))
+        dl.sampler.indices.extend(uncert_samp_idx)
 
-        # get high confidence samples `dh`
+        logger.info(
+            'Update size of `dl`  and `du` by adding uncertain samples in `dl`'
+            'and remove them from `du`'
+            ' len(dl): {}, len(du) {}'.
+            format(len(dl.sampler.indices), len(du.sampler.indices)))
+
+        # Get high confidence samples `dh`
         hcs = get_high_confidence_samples(pred_prob=pred_prob, delta=delta_0)
 
         hcs_idx, hcs_labels = hcs[:, 0].astype(int), hcs[:, 1].astype(int)
 
+        hcs_idx = [du.sampler.indices[idx] for idx in hcs_idx]
+
         # remove the samples that already selected as uncertain samples.
-        # these samples are deleted from the du
         hcs_idx = [x for x in hcs_idx if
                    x not in list(set(uncert_samp_idx) & set(hcs_idx))]
+
+        print(len(hcs_idx))
 
         # add high confidence samples to the labeled set 'dl'
         dl.sampler.indices.extend(hcs_idx)  # update the indices
@@ -98,10 +118,14 @@ def ceal_learning_algorithm(du: DataLoader,
             # update delta_0
             delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
 
+        # remove the uncertain samples from the original du
+        [du.sampler.indices.remove(idx) for idx in uncert_samp_idx]
+
         acc = model.evaluate(test_loader=dtest)
-        logger.info("Iteration: {}, len(dl): {}, len(du): {}, acc: {} ".format(
-            iteration, len(dl.sampler.indices),
-            len(du.sampler.indices), acc))
+        logger.info(
+            "Iteration: {}, len(dl): {}, len(du): {}, len(dh), acc: {} ".format(
+                iteration, len(dl.sampler.indices),
+                len(du.sampler.indices), len(hcs_idx), acc))
 
 
 if __name__ == "__main__":
