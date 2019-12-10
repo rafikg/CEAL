@@ -117,7 +117,7 @@ class AlexNet(object):
                 print('Train Epoch: {},  Loss: {:.6f}'.format(
                     epoch, loss.item() / len(data)))
         if valid_loader:
-            acc = self.test_alexnet(test_loader=valid_loader)
+            acc = self.evaluate(test_loader=valid_loader)
             print('Accuracy on the valid dataset {}'.format(acc))
 
         print('====> Epoch: {} Average loss: {:.4f}'.
@@ -157,7 +157,7 @@ class AlexNet(object):
                                    epoch=epoch
                                    )
 
-    def test_alexnet(self, test_loader: DataLoader) -> float:
+    def evaluate(self, test_loader: DataLoader) -> float:
         """
         Calaculate alexnet accuracy on test data
         Parameters
@@ -197,13 +197,15 @@ class AlexNet(object):
         """
         self.model.eval()
         self.model.to(self.device)
+        predict_results = []
         with torch.no_grad():
             for batch_idx, sample_batched in enumerate(test_loader):
-                data, labels = sample_batched['image'], \
+                data, _ = sample_batched['image'], \
                                sample_batched['label']
                 data = data.to(self.device)
                 data = data.float()
-                labels = labels.to(self.device)
                 outputs = self.model(data)
-                _, predicted = torch.max(outputs.data, 1)
+                predict_results.append(outputs)
+        return predict_results
+
 

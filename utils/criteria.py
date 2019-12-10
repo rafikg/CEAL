@@ -43,6 +43,7 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
     pred_prob : np.ndarray
         prediction probability of x_i with dimension (batch x n_class)
     k : int
+        most informative samples
 
     Returns
     -------

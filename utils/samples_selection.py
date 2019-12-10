@@ -35,7 +35,7 @@ def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
         prediction probability of x_i with dimension (batch x n_class)
     k: int
     criteria: str
-        `cl` : least_confidence()
+        `lc` : least_confidence()
         `ms` : margin_sampling()
         `en` : entropy
 
@@ -43,7 +43,7 @@ def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
     -------
     np.ndarray with dimension (K x 3)
     """
-    if criteria == 'cl':
+    if criteria == 'lc':
         uncertain_samples = least_confidence(pred_prob=pred_prob, k=k)
     elif criteria == 'ms':
         uncertain_samples = margin_sampling(pred_prob=pred_prob, k=k)
