@@ -2,8 +2,8 @@ language: python
 
 os:
   - linux
-  - osx
 install:
+  - bash Anaconda-latest-Linux-x86_64.sh
   - conda env create -f environment.yml
 script:
   - flake8 .
