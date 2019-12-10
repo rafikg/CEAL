@@ -22,6 +22,7 @@ install:
   - conda env create -f environment.yml
 
 script:
+  - conda activate myenv
   - flake8 .
 branches:
   only:
