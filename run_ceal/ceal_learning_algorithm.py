@@ -10,10 +10,14 @@ import numpy as np
 import torch
 
 
-def ceal_learning_algorithm(du: DataLoader, dl: DataLoader, dtest: DataLoader,
+def ceal_learning_algorithm(du: DataLoader,
+                            dl: DataLoader,
+                            dtest: DataLoader,
                             k: int = 1000,
-                            delta_0: float = 0.005, dr: float = 0.00033,
-                            t: int = 10, max_iter: int = 100):
+                            delta_0: float = 0.005,
+                            dr: float = 0.00033,
+                            t: int = 10,
+                            max_iter: int = 100):
     """
     Algorithm1 : Learning algorithm of CEAL.
     For simplicity, I used the same notation in the paper.
@@ -46,6 +50,11 @@ def ceal_learning_algorithm(du: DataLoader, dl: DataLoader, dtest: DataLoader,
     # Initialize the model
     model.train(epochs=50, train_loader=dl,
                 valid_loader=dtest)
+
+    # High confidence samples
+    for i in range(max_iter):
+        pass
+
 
 
 dataset_train = Caltech256Dataset(

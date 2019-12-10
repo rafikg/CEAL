@@ -182,3 +182,28 @@ class AlexNet(object):
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
         return 100 * correct / total
+
+    def predict(self, test_loader):
+        """
+        Run the inference pipeline on the test_loader data
+        Parameters
+        ----------
+        test_loader: DataLoader
+            test data
+
+        Returns
+        -------
+
+        """
+        self.model.eval()
+        self.model.to(self.device)
+        with torch.no_grad():
+            for batch_idx, sample_batched in enumerate(test_loader):
+                data, labels = sample_batched['image'], \
+                               sample_batched['label']
+                data = data.to(self.device)
+                data = data.float()
+                labels = labels.to(self.device)
+                outputs = self.model(data)
+                _, predicted = torch.max(outputs.data, 1)
+
