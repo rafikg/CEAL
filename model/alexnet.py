@@ -1,6 +1,8 @@
 # Authors: rafik gouiaa <rafikgouiaaphd@gmail.com>, ...
 
 from typing import Optional, Callable
+
+import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import torch
@@ -206,6 +208,4 @@ class AlexNet(object):
                 data = data.float()
                 outputs = self.model(data)
                 predict_results.append(outputs)
-        return predict_results
-
-
+        return np.array(predict_results)
