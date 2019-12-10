@@ -110,22 +110,21 @@ def ceal_learning_algorithm(du: DataLoader,
             dl.dataset.labels[hcs_idx[idx]] = hcs_labels[
                 idx]  # update the original labels with the pseudo labels.
 
-        if iteration % t == 0:
-            # fine tune the model
-            logger.info('fine-tune the model on dh U dl')
-            model.train(epochs=epochs, train_loader=dl)
+            if iteration % t == 0:
+                logger.info('fine-tune the model on dh U dl')
+                model.train(epochs=epochs, train_loader=dl)
 
-            # update delta_0
-            delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
+                # update delta_0
+                delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
 
-        # remove the uncertain samples from the original du
-        [du.sampler.indices.remove(idx) for idx in uncert_samp_idx]
+            # remove the uncertain samples from the original du
+            [du.sampler.indices.remove(idx) for idx in uncert_samp_idx]
 
-        acc = model.evaluate(test_loader=dtest)
-        logger.info(
-            "Iteration: {}, len(dl): {}, len(du): {}, len(dh), acc: {} ".format(
-                iteration, len(dl.sampler.indices),
-                len(du.sampler.indices), len(hcs_idx), acc))
+            acc = model.evaluate(test_loader=dtest)
+            logger.info(
+                "Iteration: {}, len(dl): {}, len(du): {}, len(dh), acc: {} ".format(
+                    iteration, len(dl.sampler.indices),
+                    len(du.sampler.indices), len(hcs_idx), acc))
 
 
 if __name__ == "__main__":
