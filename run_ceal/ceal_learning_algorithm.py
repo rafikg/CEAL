@@ -66,7 +66,7 @@ def ceal_learning_algorithm(du: DataLoader,
 
     # Evaluate model on dtest
     acc = model.evaluate(test_loader=dtest)
-    logger.info('Intial accuracy: {} '.format(acc))
+    print('====>Initial accuracy: {} '.format(acc))
 
     # High confidence samples
     for iteration in range(max_iter):
@@ -89,7 +89,7 @@ def ceal_learning_algorithm(du: DataLoader,
             'Update size of `dl`  and `du` by adding uncertain samples in `dl`'
             'and remove them from `du`'
             ' len(dl): {}, len(du) {}'.
-            format(len(dl.sampler.indices), len(du.sampler.indices)))
+                format(len(dl.sampler.indices), len(du.sampler.indices)))
 
         # Get high confidence samples `dh`
         hcs = get_high_confidence_samples(pred_prob=pred_prob, delta=delta_0)
@@ -121,8 +121,9 @@ def ceal_learning_algorithm(du: DataLoader,
             [du.sampler.indices.remove(idx) for idx in uncert_samp_idx]
 
             acc = model.evaluate(test_loader=dtest)
-            logger.info(
-                "Iteration: {}, len(dl): {}, len(du): {}, len(dh), acc: {} ".format(
+            print(
+                "Iteration: {}, len(dl): {}, len(du): {},"
+                " len(dh) {}, acc: {} ".format(
                     iteration, len(dl.sampler.indices),
                     len(du.sampler.indices), len(hcs_idx), acc))
 
