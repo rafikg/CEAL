@@ -2,9 +2,11 @@ from utils.criteria import least_confidence, entropy, margin_sampling
 import numpy as np
 
 
-def get_high_confidence_samples(pred_prob: np.ndarray, delta: float) ->np.ndarray:
+def get_high_confidence_samples(pred_prob: np.ndarray,
+                                delta: float) -> np.ndarray:
     """
-    Select high confidence samples from `D^U` whose entropy is smaller than the threshold
+    Select high confidence samples from `D^U` whose entropy is smaller than
+     the threshold
     `delta`.
 
     Parameters
@@ -52,5 +54,3 @@ def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
     else:
         raise ValueError('criteria {} not found !'.format(criteria))
     return uncertain_samples
-
-

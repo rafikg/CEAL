@@ -1,5 +1,5 @@
-from utils import Caltech256Dataset, Normalize, RandomCrop, SquarifyImage, \
-    ToTensor
+from utils import (Caltech256Dataset, Normalize, RandomCrop, SquarifyImage,
+                   ToTensor)
 from model import AlexNet
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -16,5 +16,3 @@ train_loader = DataLoader(data_set, batch_size=4,
 model = AlexNet(n_classes=256, device='cuda')
 
 model.train(epochs=10, train_loader=train_loader)
-
-

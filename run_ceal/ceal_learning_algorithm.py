@@ -1,6 +1,7 @@
 from utils import Caltech256Dataset, Normalize, RandomCrop, SquarifyImage, \
     ToTensor
-from utils import get_uncertain_samples, get_high_confidence_samples, update_threshold
+from utils import get_uncertain_samples, get_high_confidence_samples, \
+    update_threshold
 from model import AlexNet
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -60,9 +61,11 @@ def ceal_learning_algorithm(du: DataLoader,
         pred_prob = model.predict(test_loader=du)
 
         # get k uncertain samples
-        uncert_samp_idx = get_uncertain_samples(pred_prob=pred_prob, k=k, criteria=criteria)[:, 0]
+        uncert_samp_idx = get_uncertain_samples(pred_prob=pred_prob, k=k,
+                                                criteria=criteria)[:, 0]
 
-        # add the uncertain samples selected from `du` to the labeled samples set `dl`
+        # add the uncertain samples selected from `du` to the labeled samples
+        #  set `dl`
         # these samples are deleted from the original du
         dl.sampler.indices.extend(uncert_samp_idx)
 
@@ -73,12 +76,14 @@ def ceal_learning_algorithm(du: DataLoader,
 
         # remove the samples that already selected as uncertain samples.
         # these samples are deleted from the du
-        hcs_idx = [x for x in hcs_idx if x not in list(set(uncert_samp_idx) & set(hcs_idx))]
+        hcs_idx = [x for x in hcs_idx if
+                   x not in list(set(uncert_samp_idx) & set(hcs_idx))]
 
         # add high confidence samples to the labeled set 'dl'
         dl.sampler.indices.extend(hcs_idx)  # update the indices
         for idx in range(len(hcs_idx)):
-            dl.dataset.labels[hcs_idx[idx]] = hcs_labels[idx]  # update the original labels with the pseudo labels.
+            dl.dataset.labels[hcs_idx[idx]] = hcs_labels[
+                idx]  # update the original labels with the pseudo labels.
 
         if iteration % t == 0:
             # fine tune the model
@@ -88,8 +93,9 @@ def ceal_learning_algorithm(du: DataLoader,
             delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
 
         acc = model.evaluate(test_loader=dtest)
-        print("Iteration: {}, len(dl): {}, len(du): {}, acc: {} ".format(iteration, len(dl.sampler.indices),
-                                                                         len(du.sampler.indices), acc))
+        print("Iteration: {}, len(dl): {}, len(du): {}, acc: {} ".format(
+            iteration, len(dl.sampler.indices),
+            len(du.sampler.indices), acc))
 
 
 if __name__ == "__main__":

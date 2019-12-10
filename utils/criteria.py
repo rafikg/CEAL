@@ -7,8 +7,7 @@ import numpy as np
 def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
     f"""
     Rank all the unlabeled samples in an ascending order according to
-    ..math::
-    \\displaymath lc_i = \max p(y_i = j| x_i; W)
+    equation 2
 
     Parameters
     ----------
@@ -25,8 +24,9 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
     # Get max probabilities prediction and its corresponding classes
     most_pred_prob, most_pred_class = np.max(pred_prob, axis=1), np.argmax(
         pred_prob, axis=1)
-    l = len(pred_prob)
-    lc_i = np.column_stack((list(range(l)), most_pred_class, most_pred_prob))
+    size = len(pred_prob)
+    lc_i = np.column_stack(
+        (list(range(size)), most_pred_class, most_pred_prob))
     # sort lc_i in ascending order
     lc_i = lc_i[lc_i[:, -1].argsort()]
 
@@ -36,9 +36,7 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
 def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
     f"""
     Rank all the unlabeled samples in an ascending order according to the
-    ..math::
-    \\displaymath ms_i = p(y_i = j_1| x_i;W) - p(y_i = j_2|x_i;W)
-    Parameters
+    equation 3
     ----------
     pred_prob : np.ndarray
         prediction probability of x_i with dimension (batch x n_class)
@@ -53,10 +51,10 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
         column 3: margin
     """
     # Sort pred_prob to get j1 and j2
-    l = len(pred_prob)
+    size = len(pred_prob)
     margin = np.diff(np.abs(np.sort(pred_prob, axis=1)[:, ::-1][:, :2]))
     pred_class = np.argmax(pred_prob, axis=1)
-    ms_i = np.column_stack((list(range(l)), pred_class, margin))
+    ms_i = np.column_stack((list(range(size)), pred_class, margin))
 
     # sort ms_i in ascending order according to margin
     ms_i = ms_i[ms_i[:, 2].argsort()]
@@ -68,9 +66,8 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
 
 def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
     f"""
-    Rank all the unlabeled samples in an descending order according to their
-    
-    ..math::
+    Rank all the unlabeled samples in an descending order according to
+    the equation 4
 
     Parameters
     ----------
@@ -86,10 +83,10 @@ def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
         column 3: entropy
     """
     # calculate the entropy for the pred_prob
-    l = len(pred_prob)
-    entropy = - np.nansum(pred_prob * np.log(pred_prob), axis=0)
+    size = len(pred_prob)
+    entropy_ = - np.nansum(pred_prob * np.log(pred_prob), axis=0)
     pred_class = np.argmax(pred_prob, axis=1)
-    en_i = np.column_stack((list(range(l)), pred_class, entropy))
+    en_i = np.column_stack((list(range(size)), pred_class, entropy_))
 
     # Sort en_i in descending order
     en_i = en_i[(-1 * en_i[:, 2]).argsort()]

@@ -231,8 +231,7 @@ class RandomCrop(object):
         top = np.random.randint(0, h - new_h)
         left = np.random.randint(0, w - new_w)
 
-        img = img[top: top + new_h,
-              left: left + new_w]
+        img = img[top: top + new_h, left: left + new_w]
         sample = {'image': img, 'label': label}
         return sample
 
