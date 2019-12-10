@@ -24,7 +24,7 @@ def get_high_confidence_samples(pred_prob: np.ndarray,
         column 3: entropy
     """
     eni = entropy(pred_prob=pred_prob, k=len(pred_prob))
-    hcs = eni[eni < delta]
+    hcs = eni[eni[:, 2] < delta]
     return hcs
 
 
@@ -37,7 +37,7 @@ def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
         prediction probability of x_i with dimension (batch x n_class)
     k: int
     criteria: str
-        `lc` : least_confidence()
+        `cl` : least_confidence()
         `ms` : margin_sampling()
         `en` : entropy
 
@@ -45,7 +45,7 @@ def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
     -------
     np.ndarray with dimension (K x 3)
     """
-    if criteria == 'lc':
+    if criteria == 'cl':
         uncertain_samples = least_confidence(pred_prob=pred_prob, k=k)
     elif criteria == 'ms':
         uncertain_samples = margin_sampling(pred_prob=pred_prob, k=k)

@@ -11,6 +11,12 @@ import torch.optim as Optimizer
 from torchvision.models import alexnet
 from torch.utils.data import DataLoader
 
+import logging
+
+logging.basicConfig(format="%(levelname)s:%(name)s: %(message)s",
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class AlexNet(object):
     """
@@ -116,16 +122,16 @@ class AlexNet(object):
             optimizer.step()
 
             if batch_idx % each_batch_idx == 0:
-                print('Train Epoch: {},  Loss: {:.6f}'.format(
+                logger.info('Train Epoch: {},  Loss: {:.6f}'.format(
                     epoch, loss.item() / len(data)))
         if valid_loader:
             acc = self.evaluate(test_loader=valid_loader)
-            print('Accuracy on the valid dataset {}'.format(acc))
+            logger.info('Accuracy on the valid dataset {}'.format(acc))
 
-        print('====> Epoch: {} Average loss: {:.4f}'.
-              format(epoch,
-                     train_loss / len(
-                         train_loader.dataset)))
+        logger.info('====> Epoch: {} Average loss: {:.4f}'.
+                    format(epoch,
+                           train_loss / len(
+                               train_loader.dataset)))
 
     def train(self, epochs: int, train_loader: DataLoader,
               valid_loader: DataLoader = None) -> None:
@@ -199,13 +205,14 @@ class AlexNet(object):
         """
         self.model.eval()
         self.model.to(self.device)
-        predict_results = []
+        predict_results = np.empty(shape=(0, 256))
         with torch.no_grad():
             for batch_idx, sample_batched in enumerate(test_loader):
                 data, _ = sample_batched['image'], \
-                               sample_batched['label']
+                          sample_batched['label']
                 data = data.to(self.device)
                 data = data.float()
                 outputs = self.model(data)
-                predict_results.append(outputs)
-        return np.array(predict_results)
+                predict_results = np.concatenate(
+                    (predict_results, outputs.cpu().numpy()))
+        return predict_results

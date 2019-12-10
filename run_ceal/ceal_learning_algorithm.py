@@ -9,6 +9,11 @@ from torch.utils.data.sampler import SubsetRandomSampler
 
 import numpy as np
 import torch
+import logging
+
+logging.basicConfig(format="%(levelname)s:%(name)s: %(message)s",
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def ceal_learning_algorithm(du: DataLoader,
@@ -18,7 +23,7 @@ def ceal_learning_algorithm(du: DataLoader,
                             delta_0: float = 0.005,
                             dr: float = 0.00033,
                             t: int = 1,
-                            epochs: int = 1,
+                            epochs: int = 10,
                             criteria: str = 'cl',
                             max_iter: int = 45):
     """
@@ -53,8 +58,8 @@ def ceal_learning_algorithm(du: DataLoader,
     model = AlexNet(n_classes=256, device=None)
 
     # Initialize the model
-    model.train(epochs=epochs, train_loader=dl,
-                valid_loader=dtest)
+    logger.info('Intialize the model on dl and test on dtest')
+    model.train(epochs=epochs, train_loader=dl, valid_loader=dtest)
 
     # High confidence samples
     for iteration in range(max_iter):
@@ -67,12 +72,12 @@ def ceal_learning_algorithm(du: DataLoader,
         # add the uncertain samples selected from `du` to the labeled samples
         #  set `dl`
         # these samples are deleted from the original du
-        dl.sampler.indices.extend(uncert_samp_idx)
+        dl.sampler.indices.extend(uncert_samp_idx.astype(int))
 
         # get high confidence samples `dh`
         hcs = get_high_confidence_samples(pred_prob=pred_prob, delta=delta_0)
 
-        hcs_idx, hcs_labels = hcs[:, 0], hcs[:, 1]
+        hcs_idx, hcs_labels = hcs[:, 0].astype(int), hcs[:, 1].astype(int)
 
         # remove the samples that already selected as uncertain samples.
         # these samples are deleted from the du
@@ -87,13 +92,14 @@ def ceal_learning_algorithm(du: DataLoader,
 
         if iteration % t == 0:
             # fine tune the model
+            logger.info('fine-tune the model on dh U dl')
             model.train(epochs=epochs, train_loader=dl)
 
             # update delta_0
             delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
 
         acc = model.evaluate(test_loader=dtest)
-        print("Iteration: {}, len(dl): {}, len(du): {}, acc: {} ".format(
+        logger.info("Iteration: {}, len(dl): {}, len(du): {}, acc: {} ".format(
             iteration, len(dl.sampler.indices),
             len(du.sampler.indices), acc))
 

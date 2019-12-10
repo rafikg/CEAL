@@ -84,7 +84,7 @@ def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
     """
     # calculate the entropy for the pred_prob
     size = len(pred_prob)
-    entropy_ = - np.nansum(pred_prob * np.log(pred_prob), axis=0)
+    entropy_ = - np.nansum(pred_prob * np.log(pred_prob), axis=1)
     pred_class = np.argmax(pred_prob, axis=1)
     en_i = np.column_stack((list(range(size)), pred_class, entropy_))
 

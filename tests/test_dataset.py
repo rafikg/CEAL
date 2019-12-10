@@ -37,17 +37,3 @@ def test_data_to_tensor():
     sample = data_set[idx]
     assert isinstance(sample['image'], torch.Tensor)
     assert sample['image'].dtype == torch.float64
-
-
-def test_data_batch():
-    data_set = Caltech256Dataset(root_dir="../caltech256/256_ObjectCategories",
-                                 transform=transforms.Compose(
-                                     [SquarifyImage(), RandomCrop(224),
-                                      ToTensor()]))
-    train_loader = DataLoader(data_set, batch_size=4,
-                              shuffle=True, num_workers=4)
-
-    for batch_i, sample in enumerate(train_loader):
-        assert list(sample['image'].size()) == [4, 3, 224, 224]
-        if batch_i == 0:
-            break
