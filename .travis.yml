@@ -1,0 +1,15 @@
+language: python
+python:
+  - 3.6
+os:
+  - linux
+  - osx
+install:
+  - conda env create -f environment.yml
+script:
+  - flake8 .
+branches:
+  only:
+  - master
+  - experiment_feature
+
