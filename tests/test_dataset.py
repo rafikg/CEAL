@@ -7,17 +7,19 @@ import matplotlib.pyplot as plt
 
 
 def test_data_squarify():
-    data_set = Caltech256Dataset(root_dir="../caltech256/256_ObjectCategories",
-                                 transform=SquarifyImage())
+    data_set = Caltech256Dataset(
+        root_dir="../caltech256/256_ObjectCategories_train",
+        transform=SquarifyImage())
     idx = np.random.randint(0, 2000)
     sample = data_set[idx]
     assert sample['image'].shape == (256, 256, 3)
 
 
 def test_data_random_crop():
-    data_set = Caltech256Dataset(root_dir="../caltech256/256_ObjectCategories",
-                                 transform=transforms.Compose(
-                                     [SquarifyImage(), RandomCrop(224)]))
+    data_set = Caltech256Dataset(
+        root_dir="../caltech256/256_ObjectCategories_train",
+        transform=transforms.Compose(
+            [SquarifyImage(), RandomCrop(224)]))
     idx = np.random.randint(0, 2000)
     sample = data_set[idx]
     assert sample['image'].shape == (224, 224, 3)
@@ -26,12 +28,13 @@ def test_data_random_crop():
 
 
 def test_data_to_tensor():
-    data_set = Caltech256Dataset(root_dir="../caltech256/256_ObjectCategories",
-                                 transform=transforms.Compose(
-                                     [SquarifyImage(), RandomCrop(224),
-                                      Normalize([0.485, 0.456, 0.406],
-                                                [0.229, 0.224, 0.225]),
-                                      ToTensor()]))
+    data_set = Caltech256Dataset(
+        root_dir="../caltech256/256_ObjectCategories_train",
+        transform=transforms.Compose(
+            [SquarifyImage(), RandomCrop(224),
+             Normalize([0.485, 0.456, 0.406],
+                       [0.229, 0.224, 0.225]),
+             ToTensor()]))
     idx = np.random.randint(0, 2000)
     sample = data_set[idx]
     assert isinstance(sample['image'], torch.Tensor)

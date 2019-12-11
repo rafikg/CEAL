@@ -1,4 +1,6 @@
 {
-  "tests/test_dataset.py": true,
-  "tests/test_dataset.py::test_data": true
+  "tests/test_dataset.py::test_data": true,
+  "tests/test_dataset.py::test_data_random_crop": true,
+  "tests/test_dataset.py::test_data_squarify": true,
+  "tests/test_dataset.py::test_data_to_tensor": true
 }
