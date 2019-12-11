@@ -3,4 +3,3 @@
 codestyles/
 _mac/
 caltech256/
-tests/test_dataset.py
