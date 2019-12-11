@@ -1,9 +1,11 @@
+from typing import Tuple
+
 from utils.criteria import least_confidence, entropy, margin_sampling
 import numpy as np
 
 
 def get_high_confidence_samples(pred_prob: np.ndarray,
-                                delta: float) -> tuple[np.ndarray, np.ndarray]:
+                                delta: float) -> Tuple[np.ndarray, np.ndarray]:
     """
     Select high confidence samples from `D^U` whose entropy is smaller than
      the threshold
@@ -29,7 +31,7 @@ def get_high_confidence_samples(pred_prob: np.ndarray,
 
 
 def get_uncertain_samples(pred_prob: np.ndarray, k: int,
-                          criteria: str) -> tuple[np.ndarray, np.ndarray]:
+                          criteria: str) -> Tuple[np.ndarray, np.ndarray]:
     """
     Get the K most informative samples based on the criteria
     Parameters

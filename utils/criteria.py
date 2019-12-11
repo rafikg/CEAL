@@ -1,9 +1,9 @@
 # Authors rafik gouiaa <rafikgouiaaphd@gmail.com>, ...
-
+from typing import Tuple
 import numpy as np
 
 
-def least_confidence(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray,
+def least_confidence(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
                                                              np.ndarray]:
     f"""
     Rank all the unlabeled samples in an ascending order according to
@@ -41,7 +41,7 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray,
     return lc_i[:k, 0].astype(int), lc_i[:k]
 
 
-def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray,
+def margin_sampling(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
                                                             np.ndarray]:
     f"""
     Rank all the unlabeled samples in an ascending order according to the
@@ -81,7 +81,7 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray,
     return ms_i[:k, 0].astype(int), ms_i[:k]
 
 
-def entropy(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray, np.ndarray]:
+def entropy(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
     f"""
     Rank all the unlabeled samples in an descending order according to
     the equation 4
