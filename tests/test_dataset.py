@@ -1,7 +1,6 @@
 from utils import Caltech256Dataset, SquarifyImage, RandomCrop, ToTensor, \
     Normalize
 from torchvision import transforms
-from torch.utils.data import DataLoader
 import numpy as np
 import torch
 import matplotlib.pyplot as plt

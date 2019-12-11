@@ -57,20 +57,25 @@ def ceal_learning_algorithm(du: DataLoader,
     logger.info('Initial configuration: len(du): {}, len(dl): {} '.format(
         len(du.sampler.indices),
         len(dl.sampler.indices)))
+
     # Create the model
     model = AlexNet(n_classes=256, device=None)
 
     # Initialize the model
     logger.info('Intialize training the model on dl and test on dtest')
+
     model.train(epochs=epochs, train_loader=dl, valid_loader=None)
 
     # Evaluate model on dtest
     acc = model.evaluate(test_loader=dtest)
+
     print('====>Initial accuracy: {} '.format(acc))
 
-    # High confidence samples
     for iteration in range(max_iter):
-        logger.info('Calculate prediction on the unlabeled dataset `du`')
+
+        logger.info('Iteration: {}: run prediction on unlabeled data '
+                    '`du` '.format(iteration))
+
         pred_prob = model.predict(test_loader=du)
 
         # get k uncertain samples
@@ -89,7 +94,7 @@ def ceal_learning_algorithm(du: DataLoader,
             'Update size of `dl`  and `du` by adding uncertain samples in `dl`'
             'and remove them from `du`'
             ' len(dl): {}, len(du) {}'.
-                format(len(dl.sampler.indices), len(du.sampler.indices)))
+            format(len(dl.sampler.indices), len(du.sampler.indices)))
 
         # Get high confidence samples `dh`
         hcs = get_high_confidence_samples(pred_prob=pred_prob, delta=delta_0)

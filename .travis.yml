@@ -27,6 +27,7 @@ script:
   - conda activate myenv
   # run flake8 for code style checking
   - flake8 .
+  - pytest .
 branches:
   only:
   - master

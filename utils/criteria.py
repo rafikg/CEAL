@@ -1,10 +1,10 @@
 # Authors rafik gouiaa <rafikgouiaaphd@gmail.com>, ...
 
-
 import numpy as np
 
 
-def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
+def least_confidence(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
+                                                             np.ndarray):
     f"""
     Rank all the unlabeled samples in an ascending order according to
     equation 2
@@ -16,11 +16,18 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
         most informative samples
     Returns
     -------
-    np.array with dimension (K x 3) containing the K most informative samples.
-        column 1: index original of the sample.
-        column 2: predicted class.
-        column 3: lc
+    np.array with dimension (K x 1) containing the indices of the K
+        most informative samples.
+    np.array with dimension (K x 2) containing the predicted class and the `lc`
+        of the k most informative samples
+        column 1: predicted class.
+        column 2: lc
     """
+    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
+                                                         "a probability" \
+                                                         " distribution"
+    assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
+                                        "k <=  pred_prob.shape[0"
     # Get max probabilities prediction and its corresponding classes
     most_pred_prob, most_pred_class = np.max(pred_prob, axis=1), np.argmax(
         pred_prob, axis=1)
@@ -30,10 +37,11 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> np.ndarray:
     # sort lc_i in ascending order
     lc_i = lc_i[lc_i[:, -1].argsort()]
 
-    return lc_i[:k]
+    return lc_i[:k, 0].astype(int), lc_i[:k, 1:]
 
 
-def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
+def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
+                                                            np.ndarray):
     f"""
     Rank all the unlabeled samples in an ascending order according to the
     equation 3
@@ -45,11 +53,18 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
 
     Returns
     -------
-    np.array with dimension (K x 3) containing the K most informative samples.
-        column 1: index original of the sample.
-        column 2: predicted class.
-        column 3: margin
+    np.array with dimension (K x 1)  containing the indices of the K
+        most informative samples.
+    np.array with dimension (K x 2) containing the predicted class and the
+        `ms_i` of the k most informative samples
+        column 1: predicted class.
+        column 2: margin
     """
+    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
+                                                         "a probability" \
+                                                         " distribution"
+    assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
+                                        "k <=  pred_prob.shape[0"
     # Sort pred_prob to get j1 and j2
     size = len(pred_prob)
     margin = np.diff(np.abs(np.sort(pred_prob, axis=1)[:, ::-1][:, :2]))
@@ -61,10 +76,10 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> np.ndarray:
 
     # the smaller the margin  means the classifier is more
     # uncertain about the sample
-    return ms_i[:k]
+    return ms_i[:k, 0], ms_i[:k, 1:]
 
 
-def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
+def entropy(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray, np.ndarray):
     f"""
     Rank all the unlabeled samples in an descending order according to
     the equation 4
@@ -77,12 +92,19 @@ def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
 
     Returns
     -------
-    np.array with dimension (K x 3) containing the K most informative samples.
-        column 1: index original of the sample.
+    np.array with dimension (K x 1)  containing the indices of the K
+        most informative samples.
+    np.array with dimension (K x 2) containing the predicted class and the
+        `en_i` of the k most informative samples
         column 2: predicted class.
         column 3: entropy
     """
     # calculate the entropy for the pred_prob
+    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
+                                                         "a probability" \
+                                                         " distribution"
+    assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
+                                        "k <=  pred_prob.shape[0"
     size = len(pred_prob)
     entropy_ = - np.nansum(pred_prob * np.log(pred_prob), axis=1)
     pred_class = np.argmax(pred_prob, axis=1)
@@ -90,4 +112,4 @@ def entropy(pred_prob: np.ndarray, k: int) -> np.ndarray:
 
     # Sort en_i in descending order
     en_i = en_i[(-1 * en_i[:, 2]).argsort()]
-    return en_i[:k]
+    return en_i[:k, 0].astype(int), en_i[:k, 1:]
