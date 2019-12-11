@@ -69,7 +69,7 @@ def ceal_learning_algorithm(du: DataLoader,
     # Evaluate model on dtest
     acc = model.evaluate(test_loader=dtest)
 
-    print('====>Initial accuracy: {} '.format(acc))
+    print('====> Initial accuracy: {} '.format(acc))
 
     for iteration in range(max_iter):
 
@@ -90,10 +90,11 @@ def ceal_learning_algorithm(du: DataLoader,
         dl.sampler.indices.extend(uncert_samp_idx)
 
         logger.info(
-            'Update size of `dl`  and `du` by adding uncertain samples in `dl`'
-            'and remove them from `du`'
+            'Update size of `dl`  and `du` by adding uncertain {} samples'
+            ' in `dl`'
             ' len(dl): {}, len(du) {}'.
-            format(len(dl.sampler.indices), len(du.sampler.indices)))
+            format(len(uncert_samp_idx), len(dl.sampler.indices),
+                   len(du.sampler.indices)))
 
         # get high confidence samples `dh`
         hcs_idx, hcs_labels = get_high_confidence_samples(pred_prob=pred_prob,
@@ -111,26 +112,33 @@ def ceal_learning_algorithm(du: DataLoader,
         dl.sampler.indices.extend(hcs_idx)
         # (2) update the original labels with the pseudo labels.
         for idx in range(len(hcs_idx)):
-            dl.dataset.labels[hcs_idx[idx]] = hcs_labels[
-                idx]
+            dl.dataset.labels[hcs_idx[idx]] = hcs_labels[idx]
+        logger.info(
+            'Update size of `dl`  and `du` by adding {} hcs samples in `dl`'
+            ' len(dl): {}, len(du) {}'.
+            format(len(hcs_idx), len(dl.sampler.indices),
+                   len(du.sampler.indices)))
 
-            if iteration % t == 0:
-                logger.info('Iteration: {} fine-tune the model on dh U dl'.
-                            format(iteration))
-                model.train(epochs=epochs, train_loader=dl)
+        if iteration % t == 0:
+            logger.info('Iteration: {} fine-tune the model on dh U dl'.
+                        format(iteration))
+            model.train(epochs=epochs, train_loader=dl)
 
-                # update delta_0
-                delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
+            # update delta_0
+            delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
 
-            # remove the uncertain samples from the original `du`
-            [du.sampler.indices.remove(val) for val in uncert_samp_idx]
+        # remove the uncertain samples from the original `du`
+        logger.info('remove {} uncertain samples from du'.
+                    format(len(uncert_samp_idx)))
+        for val in uncert_samp_idx:
+            du.sampler.indices.remove(val)
 
-            acc = model.evaluate(test_loader=dtest)
-            print(
-                "Iteration: {}, len(dl): {}, len(du): {},"
-                " len(dh) {}, acc: {} ".format(
-                    iteration, len(dl.sampler.indices),
-                    len(du.sampler.indices), len(hcs_idx), acc))
+        acc = model.evaluate(test_loader=dtest)
+        print(
+            "Iteration: {}, len(dl): {}, len(du): {},"
+            " len(dh) {}, acc: {} ".format(
+                iteration, len(dl.sampler.indices),
+                len(du.sampler.indices), len(hcs_idx), acc))
 
 
 if __name__ == "__main__":

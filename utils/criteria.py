@@ -24,9 +24,10 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
         column 2: predicted class.
         column 3: lc
     """
-    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not " \
-                                                         "a probability" \
-                                                         " distribution"
+    assert np.round(pred_prob.sum(1).sum()) == pred_prob.shape[
+        0], "pred_prob is not " \
+            "a probability" \
+            " distribution"
     assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
                                         "k <=  pred_prob.shape[0"
     # Get max probabilities prediction and its corresponding classes
@@ -38,7 +39,7 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
     # sort lc_i in ascending order
     lc_i = lc_i[lc_i[:, -1].argsort()]
 
-    return lc_i[:k, 0].astype(int), lc_i[:k]
+    return lc_i[:k, 0].astype(np.int32), lc_i[:k]
 
 
 def margin_sampling(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
@@ -62,9 +63,10 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
         column 2: predicted class.
         column 3: margin sampling
     """
-    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not " \
-                                                         "a probability" \
-                                                         " distribution"
+    assert np.round(pred_prob.sum(1).sum()) == pred_prob.shape[
+        0], "pred_prob is not " \
+            "a probability" \
+            " distribution"
     assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
                                         "k <=  pred_prob.shape[0"
     # Sort pred_prob to get j1 and j2
@@ -78,7 +80,7 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
 
     # the smaller the margin  means the classifier is more
     # uncertain about the sample
-    return ms_i[:k, 0].astype(int), ms_i[:k]
+    return ms_i[:k, 0].astype(np.int32), ms_i[:k]
 
 
 def entropy(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
@@ -104,9 +106,10 @@ def entropy(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
 
     """
     # calculate the entropy for the pred_prob
-    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not " \
-                                                         "a probability" \
-                                                         " distribution"
+    assert np.round(pred_prob.sum(1).sum()) == pred_prob.shape[
+        0], "pred_prob is not " \
+            "a probability" \
+            " distribution"
     assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
                                         "k <=  pred_prob.shape[0"
     size = len(pred_prob)
@@ -116,4 +119,4 @@ def entropy(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
 
     # Sort en_i in descending order
     en_i = en_i[(-1 * en_i[:, 2]).argsort()]
-    return en_i[:k, 0].astype(int), en_i[:k]
+    return en_i[:k, 0].astype(np.int32), en_i[:k]

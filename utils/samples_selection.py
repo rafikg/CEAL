@@ -27,7 +27,7 @@ def get_high_confidence_samples(pred_prob: np.ndarray,
     """
     _, eni = entropy(pred_prob=pred_prob, k=len(pred_prob))
     hcs = eni[eni[:, 2] < delta]
-    return hcs[:, 0], hcs[:, 2]
+    return hcs[:, 0].astype(np.int32), hcs[:, 2].astype(np.int32)
 
 
 def get_uncertain_samples(pred_prob: np.ndarray, k: int,
