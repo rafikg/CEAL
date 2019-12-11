@@ -1,1 +1,5 @@
-[]
+[
+  "tests/test_criteria.py::test_least_confidence",
+  "tests/test_criteria.py::test_margin_sampling",
+  "tests/test_criteria.py::test_entropy"
+]

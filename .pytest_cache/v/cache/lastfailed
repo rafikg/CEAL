@@ -1,5 +1,4 @@
 {
-  "tests/test_criteria.py": true,
   "tests/test_dataset.py": true,
   "tests/test_dataset.py::test_data": true
 }

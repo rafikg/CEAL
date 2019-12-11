@@ -20,11 +20,11 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
         most informative samples.
     np.array with dimension (K x 3) containing the indices, the predicted class
         and the `lc` of the k most informative samples
-        column 2: indices
+        column 1: indices
         column 2: predicted class.
         column 3: lc
     """
-    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
+    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not " \
                                                          "a probability" \
                                                          " distribution"
     assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
@@ -58,11 +58,11 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray,
         most informative samples.
     np.array with dimension (K x 3) containing the indices, the predicted class
         and the `ms_i` of the k most informative samples
-        column 2: indices
+        column 1: indices
         column 2: predicted class.
         column 3: margin sampling
     """
-    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
+    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not " \
                                                          "a probability" \
                                                          " distribution"
     assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
@@ -98,13 +98,13 @@ def entropy(pred_prob: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
         most informative samples.
     np.array with dimension (K x 3) containing the indices, the predicted class
         and the `en_i` of the k most informative samples
-        column 2: indices
+        column 1: indices
         column 2: predicted class.
         column 3: entropy
 
     """
     # calculate the entropy for the pred_prob
-    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
+    assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not " \
                                                          "a probability" \
                                                          " distribution"
     assert 0 < k <= pred_prob.shape[0], "invalid k value k should be >0 &" \
