@@ -3,8 +3,8 @@
 import numpy as np
 
 
-def least_confidence(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
-                                                             np.ndarray):
+def least_confidence(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray,
+                                                             np.ndarray]:
     f"""
     Rank all the unlabeled samples in an ascending order according to
     equation 2
@@ -18,10 +18,11 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
     -------
     np.array with dimension (K x 1) containing the indices of the K
         most informative samples.
-    np.array with dimension (K x 2) containing the predicted class and the `lc`
-        of the k most informative samples
-        column 1: predicted class.
-        column 2: lc
+    np.array with dimension (K x 3) containing the indices, the predicted class
+        and the `lc` of the k most informative samples
+        column 2: indices
+        column 2: predicted class.
+        column 3: lc
     """
     assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
                                                          "a probability" \
@@ -37,11 +38,11 @@ def least_confidence(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
     # sort lc_i in ascending order
     lc_i = lc_i[lc_i[:, -1].argsort()]
 
-    return lc_i[:k, 0].astype(int), lc_i[:k, 1:]
+    return lc_i[:k, 0].astype(int), lc_i[:k]
 
 
-def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
-                                                            np.ndarray):
+def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray,
+                                                            np.ndarray]:
     f"""
     Rank all the unlabeled samples in an ascending order according to the
     equation 3
@@ -55,10 +56,11 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
     -------
     np.array with dimension (K x 1)  containing the indices of the K
         most informative samples.
-    np.array with dimension (K x 2) containing the predicted class and the
-        `ms_i` of the k most informative samples
-        column 1: predicted class.
-        column 2: margin
+    np.array with dimension (K x 3) containing the indices, the predicted class
+        and the `ms_i` of the k most informative samples
+        column 2: indices
+        column 2: predicted class.
+        column 3: margin sampling
     """
     assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
                                                          "a probability" \
@@ -76,10 +78,10 @@ def margin_sampling(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray,
 
     # the smaller the margin  means the classifier is more
     # uncertain about the sample
-    return ms_i[:k, 0], ms_i[:k, 1:]
+    return ms_i[:k, 0].astype(int), ms_i[:k]
 
 
-def entropy(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray, np.ndarray):
+def entropy(pred_prob: np.ndarray, k: int) -> tuple[np.ndarray, np.ndarray]:
     f"""
     Rank all the unlabeled samples in an descending order according to
     the equation 4
@@ -94,10 +96,12 @@ def entropy(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray, np.ndarray):
     -------
     np.array with dimension (K x 1)  containing the indices of the K
         most informative samples.
-    np.array with dimension (K x 2) containing the predicted class and the
-        `en_i` of the k most informative samples
+    np.array with dimension (K x 3) containing the indices, the predicted class
+        and the `en_i` of the k most informative samples
+        column 2: indices
         column 2: predicted class.
         column 3: entropy
+
     """
     # calculate the entropy for the pred_prob
     assert pred_prob.sum(1).sum() == pred_prob.shape[0], "pred_prob is not" \
@@ -112,4 +116,4 @@ def entropy(pred_prob: np.ndarray, k: int) -> tuple(np.ndarray, np.ndarray):
 
     # Sort en_i in descending order
     en_i = en_i[(-1 * en_i[:, 2]).argsort()]
-    return en_i[:k, 0].astype(int), en_i[:k, 1:]
+    return en_i[:k, 0].astype(int), en_i[:k]

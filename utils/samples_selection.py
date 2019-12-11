@@ -3,7 +3,7 @@ import numpy as np
 
 
 def get_high_confidence_samples(pred_prob: np.ndarray,
-                                delta: float) -> np.ndarray:
+                                delta: float) -> tuple[np.ndarray, np.ndarray]:
     """
     Select high confidence samples from `D^U` whose entropy is smaller than
      the threshold
@@ -18,17 +18,18 @@ def get_high_confidence_samples(pred_prob: np.ndarray,
 
     Returns
     -------
-    np.array  with dimension (None, 3). The highest confidence samples.
-        column 1: index original of the sample.
-        column 2: predicted class.
-        column 3: entropy
+    np.array with dimension (K x 1)  containing the indices of the K
+        most informative samples.
+    np.array with dimension (K x 1) containing the predicted classes of the
+        k most informative samples
     """
-    eni = entropy(pred_prob=pred_prob, k=len(pred_prob))
+    _, eni = entropy(pred_prob=pred_prob, k=len(pred_prob))
     hcs = eni[eni[:, 2] < delta]
-    return hcs
+    return hcs[:, 0], hcs[:, 2]
 
 
-def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
+def get_uncertain_samples(pred_prob: np.ndarray, k: int,
+                          criteria: str) -> tuple[np.ndarray, np.ndarray]:
     """
     Get the K most informative samples based on the criteria
     Parameters
@@ -43,7 +44,7 @@ def get_uncertain_samples(pred_prob: np.ndarray, k: int, criteria: str):
 
     Returns
     -------
-    np.ndarray with dimension (K x 3)
+    tuple(np.ndarray, np.ndarray)
     """
     if criteria == 'cl':
         uncertain_samples = least_confidence(pred_prob=pred_prob, k=k)

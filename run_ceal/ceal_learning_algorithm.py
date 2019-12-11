@@ -62,7 +62,7 @@ def ceal_learning_algorithm(du: DataLoader,
     model = AlexNet(n_classes=256, device=None)
 
     # Initialize the model
-    logger.info('Intialize training the model on dl and test on dtest')
+    logger.info('Intialize training the model on `dl` and test on `dtest`')
 
     model.train(epochs=epochs, train_loader=dl, valid_loader=None)
 
@@ -79,11 +79,10 @@ def ceal_learning_algorithm(du: DataLoader,
         pred_prob = model.predict(test_loader=du)
 
         # get k uncertain samples
-        uncert_samp_idx = get_uncertain_samples(pred_prob=pred_prob, k=k,
-                                                criteria=criteria)[:, 0]
+        uncert_samp_idx, _ = get_uncertain_samples(pred_prob=pred_prob, k=k,
+                                                   criteria=criteria)
 
-        uncert_samp_idx = uncert_samp_idx.astype(int)
-
+        # get original indices
         uncert_samp_idx = [du.sampler.indices[idx] for idx in uncert_samp_idx]
 
         # add the uncertain samples selected from `du` to the labeled samples
@@ -96,34 +95,35 @@ def ceal_learning_algorithm(du: DataLoader,
             ' len(dl): {}, len(du) {}'.
             format(len(dl.sampler.indices), len(du.sampler.indices)))
 
-        # Get high confidence samples `dh`
-        hcs = get_high_confidence_samples(pred_prob=pred_prob, delta=delta_0)
-
-        hcs_idx, hcs_labels = hcs[:, 0].astype(int), hcs[:, 1].astype(int)
-
+        # get high confidence samples `dh`
+        hcs_idx, hcs_labels = get_high_confidence_samples(pred_prob=pred_prob,
+                                                          delta=delta_0)
+        # get the original indices
         hcs_idx = [du.sampler.indices[idx] for idx in hcs_idx]
 
         # remove the samples that already selected as uncertain samples.
         hcs_idx = [x for x in hcs_idx if
                    x not in list(set(uncert_samp_idx) & set(hcs_idx))]
 
-        print(len(hcs_idx))
-
         # add high confidence samples to the labeled set 'dl'
-        dl.sampler.indices.extend(hcs_idx)  # update the indices
+
+        # (1) update the indices
+        dl.sampler.indices.extend(hcs_idx)
+        # (2) update the original labels with the pseudo labels.
         for idx in range(len(hcs_idx)):
             dl.dataset.labels[hcs_idx[idx]] = hcs_labels[
-                idx]  # update the original labels with the pseudo labels.
+                idx]
 
             if iteration % t == 0:
-                logger.info('fine-tune the model on dh U dl')
+                logger.info('Iteration: {} fine-tune the model on dh U dl'.
+                            format(iteration))
                 model.train(epochs=epochs, train_loader=dl)
 
                 # update delta_0
                 delta_0 = update_threshold(delta=delta_0, dr=dr, t=iteration)
 
-            # remove the uncertain samples from the original du
-            [du.sampler.indices.remove(idx) for idx in uncert_samp_idx]
+            # remove the uncertain samples from the original `du`
+            [du.sampler.indices.remove(val) for val in uncert_samp_idx]
 
             acc = model.evaluate(test_loader=dtest)
             print(
