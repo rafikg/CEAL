@@ -12,7 +12,7 @@ class Encoder(tf.keras.layers.Layer):
         self.conv1 = Conv2D(filters=32, kernel_size=3, strides=2,
                             activation='relu',
                             name='conv1')
-        self.conv2 = Conv2D(filters=32, kernel_size=3, strides=2,
+        self.conv2 = Conv2D(filters=64, kernel_size=3, strides=2,
                             activation='relu', name='conv2')
         self.flatten = Flatten(name='flatten')
         self.dense = Dense(latent_dim * 2, name='dense')
@@ -23,8 +23,7 @@ class Encoder(tf.keras.layers.Layer):
         inputs = self.conv2(inputs)
         inputs = self.flatten(inputs)
         inputs = self.dense(inputs)
-        z_mean, z_log_var = tf.split(inputs,
-                                     [self.latent_dim, self.latent_dim], 0)
+        z_mean, z_log_var = tf.split(inputs, num_or_size_splits=2, axis=1)
         z = self.sampling((z_mean, z_log_var))
         return z_mean, z_log_var, z
 
@@ -47,11 +46,12 @@ class Decoder(tf.keras.layers.Layer):
                                             activation='relu',
                                             name='conv_trans_2')
 
-        # No activation (get image with origianl size)
+        # sigmoid activation (get image with origianl size)
         self.conv_trans_3 = Conv2DTranspose(filters=1,
                                             kernel_size=3,
-                                            strides=(2, 2),
+                                            strides=(1, 1),
                                             padding='SAME',
+                                            activation='sigmoid',
                                             name='conv_trans_3')
 
     def call(self, inputs, **kwargs):
@@ -88,5 +88,4 @@ class VAE(Model):
         kl_loss = - 0.5 * tf.reduce_mean(
             z_log_var - tf.square(z_mean) - tf.exp(z_log_var) + 1)
         self.add_loss(kl_loss)
-
         return reconstructed
